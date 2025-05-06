@@ -4,16 +4,21 @@ WORKDIR /app
 
 # 依存関係のインストール
 COPY app/package*.json ./
-RUN npm install
+RUN npm ci
+# 明示的にrechartsをインストール
+RUN npm install recharts
 
-# Prismaクライアントの生成
+# Prismaスキーマのコピー
 COPY app/prisma ./prisma
-RUN npx prisma generate
 
 # アプリケーションのコピー
 COPY app .
 
+# Prismaクライアントの生成（明示的に実行）
+RUN npx prisma generate
+
 # 開発サーバーの起動
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+# 開発環境起動時にもPrismaクライアントを生成してから起動
+CMD ["sh", "-c", "npx prisma generate && npm run dev"]
